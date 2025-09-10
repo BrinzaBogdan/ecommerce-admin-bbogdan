@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { AlertModal } from "@/components/modals/alert-modal";
-import { ApiAlert } from "@/components/ui/api-alert";  
+import { ApiAlert } from "@/components/ui/api-alert";
 import { useOrigin } from "@/hooks/use-origin";
 
 interface SettingsFormProps {
@@ -40,7 +40,6 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
   const router = useRouter();
   const origin = useOrigin();
 
-
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -52,7 +51,9 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
   const onSubmit = async (data: SettingsFormValues) => {
     try {
       setLoading(true);
+
       await axios.patch(`/api/stores/${params.storeId}`, data);
+
       router.refresh();
       toast.success("Store updated.");
     } catch (error) {
@@ -78,9 +79,8 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
   };
 
   return (
-
     <>
-      <AlertModal 
+      <AlertModal
         isOpen={open}
         onClose={() => setOpen(false)}
         onConfirm={onDelete}
@@ -128,10 +128,10 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
         </form>
       </Form>
       <Separator />
-      <ApiAlert 
-      title="NEXT_PUBLIC_API_URL" 
-      description={`${origin}/api/${params.storeId}`} 
-      variant="public"
+      <ApiAlert
+        title="NEXT_PUBLIC_API_URL"
+        description={`${origin}/api/${params.storeId}`}
+        variant="public"
       />
     </>
   );

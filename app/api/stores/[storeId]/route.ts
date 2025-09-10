@@ -21,7 +21,7 @@ export async function PATCH(
 
     const { storeId } = params;
 
-    if (!storeId) {
+    if (!params.storeId) {
       return new NextResponse("Store id is required", { status: 400 });
     }
 
