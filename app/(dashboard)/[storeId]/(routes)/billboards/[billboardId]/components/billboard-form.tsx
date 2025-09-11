@@ -1,15 +1,13 @@
 "use client";
-
 import * as z from "zod";
+import { Billboard, Store } from "@/lib/generated/prisma";
+import { Heading } from "@/components/ui/heading";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Heading } from "@/components/ui/heading";
-import { Separator } from "@/components/ui/separator";
-import { Billboard } from "@prisma/client";
-import { Trash } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -19,9 +17,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import toast from "react-hot-toast";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { AlertModal } from "@/components/modals/alert-modal";
+import { ApiAlert } from "@/components/ui/api-alert";
+import { useOrigin } from "@/hooks/use-origin";
 import ImageUpload from "@/components/ui/image-upload";
 
 const formSchema = z.object({
@@ -35,30 +36,30 @@ interface BillboardFormProps {
   initialData: Billboard | null;
 }
 
-export const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
-  const params = useParams<{ storeId: string; billboardId?: string }>();
+export const BillboardForm: React.FC<BillboardFormProps> = ({
+  initialData,
+}) => {
+  const params = useParams();
   const router = useRouter();
-
+  const origin = useOrigin();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const title = initialData ? "Edit billboard" : "Create billboard";
-  const description = initialData ? "Edit billboard" : "Add a new billboard";
-  const toastMessage = initialData ? "Billboard updated." : "Billboard created.";
+  const description = initialData ? "Edit a billboard" : "Add a new billboard";
+  const toastMessage = initialData
+    ? "Billboard updated."
+    : "Billboard created.";
   const action = initialData ? "Save changes" : "Create";
 
   const form = useForm<BillboardFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData || {
-      label: "",
-      imageUrl: "",
-    },
+    defaultValues: initialData || { label: "", imageUrl: "" },
   });
 
   const onSubmit = async (data: BillboardFormValues) => {
     try {
       setLoading(true);
-
       if (initialData) {
         await axios.patch(
           `/api/${params.storeId}/billboards/${params.billboardId}`,
@@ -69,10 +70,9 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => 
       }
 
       router.refresh();
-      router.push(`/${params.storeId}/billboards`);
       toast.success(toastMessage);
     } catch (error) {
-      toast.error("Something went wrong.");
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -85,8 +85,8 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => 
         `/api/${params.storeId}/billboards/${params.billboardId}`
       );
       router.refresh();
-      router.push(`/${params.storeId}/billboards`);
-      toast.success("Billboard deleted.");
+      router.push("/");
+      toast.success("Billboard deleted");
     } catch (error) {
       toast.error(
         "Make sure you removed all categories using this billboard first."
@@ -96,7 +96,6 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => 
       setOpen(false);
     }
   };
-
   return (
     <>
       <AlertModal
@@ -110,7 +109,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => 
         {initialData && (
           <Button
             disabled={loading}
-            variant="destructive"
+            variant={"destructive"}
             size="sm"
             onClick={() => setOpen(true)}
           >
@@ -132,7 +131,7 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => 
                 <FormLabel>Background image</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={field.value}
+                    value={field.value ? [field.value] : []}
                     disabled={loading}
                     onChange={(url) => field.onChange(url)}
                     onRemove={() => field.onChange("")}

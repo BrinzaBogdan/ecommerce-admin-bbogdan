@@ -1,6 +1,6 @@
-import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
+import prismadb from "@/lib/prismadb";
 
 export async function POST(
   req: Request,
@@ -8,7 +8,9 @@ export async function POST(
 ) {
   try {
     const { userId } = await auth();
+
     const body = await req.json();
+
     const { label, imageUrl } = body;
 
     if (!userId) {
@@ -20,32 +22,25 @@ export async function POST(
     }
 
     if (!imageUrl) {
-      return new NextResponse("image URL is required", { status: 400 });
+      return new NextResponse("Image URL is required", { status: 400 });
     }
 
     if (!params.storeId) {
-        return new NextResponse("Store ID is required", { status: 400 });
-
+      return new NextResponse("Store ID is required", { status: 400 });
     }
 
     const storeByUserId = await prismadb.store.findFirst({
-        where: {
-            id: params.storeId,
-        userId
-        }
+      where: {
+        id: params.storeId,
+        userId,
+      },
     });
 
     if (!storeByUserId) {
-        return new NextResponse("Unauthorized",  {status: 403});
+      return new NextResponse("Unauthorized", { status: 403 });
     }
-
-
     const billboard = await prismadb.billboard.create({
-      data: {
-        label,
-        imageUrl,
-        storeId: params.storeId
-      },
+      data: { label, imageUrl, storeId: params.storeId },
     });
 
     return NextResponse.json(billboard);
@@ -53,16 +48,15 @@ export async function POST(
     console.log("[BILLBOARDS_POST]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
-};
+}
 
 export async function GET(
   req: Request,
   { params }: { params: { storeId: string } }
 ) {
   try {
-     if (!params.storeId) {
-        return new NextResponse("Store ID is required", { status: 400 });
-
+    if (!params.storeId) {
+      return new NextResponse("Store ID is required", { status: 400 });
     }
 
     const billboards = await prismadb.billboard.findMany({
@@ -76,5 +70,4 @@ export async function GET(
     console.log("[BILLBOARDS_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
-};
-
+}
