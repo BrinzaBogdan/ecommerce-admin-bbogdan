@@ -10,11 +10,12 @@ export async function GET(
     const { userId } = await auth();
 
     if (!params.categoryId) {
-      return new NextResponse("Category id is required", { status: 400 });
+      return new NextResponse("Billboard id is required", { status: 400 });
     }
 
     const category = await prismadb.category.findUnique({
       where: { id: params.categoryId },
+      include: { billboard: true },
     });
 
     return NextResponse.json(category);
@@ -37,10 +38,10 @@ export async function PATCH(
     }
 
     if (!name) {
-      return new NextResponse("Name is required", { status: 400 });
+      return new NextResponse("Label is required", { status: 400 });
     }
     if (!billboardId) {
-      return new NextResponse("Billboard id is required", { status: 400 });
+      return new NextResponse("Image URL is required", { status: 400 });
     }
 
     if (!params.categoryId) {
@@ -81,7 +82,7 @@ export async function DELETE(
     }
 
     if (!params.categoryId) {
-      return new NextResponse("Billboard id is required", { status: 400 });
+      return new NextResponse("Category id is required", { status: 400 });
     }
 
     const storeByUserId = await prismadb.store.findFirst({
